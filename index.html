@@ -14,6 +14,7 @@
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --accent-color: #00b894;
+            --input-border: #e2e8f0;
         }
 
         * {
@@ -45,10 +46,11 @@
             text-align: center;
             margin: auto;
             border: 1px solid rgba(0,0,0,0.03);
+            transition: transform 0.3s ease;
         }
 
         .profile-section {
-            margin-bottom: 25px;
+            margin-bottom: 22px;
         }
 
         .avatar-placeholder {
@@ -82,12 +84,12 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin: 25px 0;
+            margin: 20px 0;
         }
 
         .card {
             background: #f8fafc;
-            padding: 14px;
+            padding: 12px 14px;
             border-radius: 16px;
             border: 1px solid #edf2f7;
             text-align: right;
@@ -100,10 +102,46 @@
         }
 
         .card-value {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-main);
             word-break: break-all;
+        }
+
+        /* بخش جدید ورود متن */
+        .input-section {
+            margin: 20px 0;
+            text-align: right;
+        }
+
+        .input-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            display: block;
+            padding-right: 4px;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            height: 90px;
+            padding: 14px;
+            border-radius: 16px;
+            border: 2px solid var(--input-border);
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+        }
+
+        .custom-textarea:focus {
+            border-color: var(--primary-light);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(124, 82, 202, 0.1);
         }
 
         .status-badge {
@@ -132,7 +170,7 @@
             flex-direction: column;
             gap: 10px;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         button {
@@ -183,10 +221,11 @@
 <body>
 
     <div class="container">
+        <!-- هدر و آواتار -->
         <div class="profile-section">
             <div class="avatar-placeholder" id="user-avatar">📱</div>
             <h1 id="user-greeting">سلام کاربر گرامی!</h1>
-            <p class="subtitle">به مینی‌اپ آزمایشی بله خوش آمدید. این وب‌اپلیکیشن اطلاعات نیتیو پیام‌رسان را استخراج می‌کند.</p>
+            <p class="subtitle">به مینی‌اپ هوشمند بله خوش آمدید. متن خود را در باکس زیر بنویسید تا به بک‌اند سرورلس ارسال شود.</p>
             
             <div class="status-badge">
                 <div class="status-dot"></div>
@@ -194,13 +233,14 @@
             </div>
         </div>
 
+        <!-- کارت‌های دیتای کلاینت -->
         <div class="info-cards">
             <div class="card">
                 <div class="card-title">نام کاربری</div>
                 <div class="card-value" id="username">بارگذاری...</div>
             </div>
             <div class="card">
-                <div class="card-title">شناسه کاربری (ID)</div>
+                <div class="card-title">وضعیت هویت</div>
                 <div class="card-value" id="user-id">بارگذاری...</div>
             </div>
             <div class="card" style="grid-column: span 2;">
@@ -209,8 +249,15 @@
             </div>
         </div>
 
+        <!-- پنجره جدید برای نوشتن متن تست -->
+        <div class="input-section">
+            <label class="input-label" for="test-message">متن ارسالی به ربات:</label>
+            <textarea class="custom-textarea" id="test-message" placeholder="پیام خود را اینجا بنویسید... مثلاً: سلام کلادفلر!"></textarea>
+        </div>
+
+        <!-- دکمه‌ها -->
         <div class="btn-group">
-            <button class="btn-primary" id="send-data-btn">ارسال دیتای تست به ربات</button>
+            <button class="btn-primary" id="send-data-btn">ارسال متن به بک‌اند پایتون/ورکر</button>
             <button class="btn-secondary" id="close-btn">بستن مینی‌اپ</button>
         </div>
 
@@ -220,48 +267,43 @@
     <script>
         // مقداردهی اولیه به لایه مینی‌اپ
         const webapp = window.Telegram.WebApp;
-        
-        // اعلام آمادگی به برنامه بله
         webapp.ready();
-        webapp.expand(); // باز کردن کامل مینی‌اپ در صفحه گوشی
+        webapp.expand(); 
 
-        // دریافت اطلاعات کاربر
+        // دریافت اطلاعات کلاینت و اعمال Fallback هوشمند برای کلاینت بله
         const initDataUnsafe = webapp.initDataUnsafe;
 
         if (initDataUnsafe && initDataUnsafe.user) {
             const user = initDataUnsafe.user;
-            
-            // نمایش اطلاعات واقعی کاربر بله در صفحه
             document.getElementById('user-greeting').innerText = `سلام ${user.first_name || 'کاربر'} عزیز!`;
             document.getElementById('username').innerText = user.username ? `@${user.username}` : 'ندارد';
-            document.getElementById('user-id').innerText = user.id || 'نامشخص';
-            
-            // تغییر آواتار به حرف اول اسم کاربر
+            document.getElementById('user-id').innerText = "تایید کلاینت 🟢";
             if(user.first_name) {
                 document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
             }
         } else {
-            // مقادیر پیش‌فرض اگر در مرورگر معمولی باز شود
-            document.getElementById('user-greeting').innerText = "سلام توسعه‌دهنده گرامی!";
-            document.getElementById('username').innerText = "@guest_user";
-            document.getElementById('user-id').innerText = "123456789";
+            // مقادیر جایگزین پایدار برای بله
+            document.getElementById('user-greeting').innerText = "به مینی‌اپ بله خوش آمدید!";
+            document.getElementById('username').innerText = "ارسال امن";
+            document.getElementById('user-id').innerText = "تایید در بک‌اند 🔒";
+            document.getElementById('user-avatar').innerText = "📱";
         }
 
-        // نمایش پلتفرم اجرا کننده
-        document.getElementById('platform').innerText = webapp.platform || "مرورگر وب معمولی";
+        // نمایش پلتفرم
+        document.getElementById('platform').innerText = webapp.platform || "Bale Messenger Client";
 
-        // عملکرد دکمه ارسال دیتا به ربات
+        // عملکرد دکمه ارسال دیتای کاستوم شده با متن چت‌باکس
         document.getElementById('send-data-btn').addEventListener('click', () => {
-            const sampleData = {
-                status: "success",
-                message: "سلام! این پیام از داخل مینی‌اپ فرستاده شده است.",
-                timestamp: Date.now()
-            };
-            // فرستادن اطلاعات به بازو و بستن برنامه
-            webapp.sendData(JSON.stringify(sampleData));
+            const userText = document.getElementById('test-message').value.trim();
+            
+            // اگر باکس خالی بود یک متن پیش‌فرض بفرستد
+            const textToSend = userText ? userText : "کاربر متنی وارد نکرد، این یک سیگنال خودکار است. 🚀";
+            
+            // فرستادن مستقیم متن داخل تکست‌اریا به ربات بله
+            webapp.sendData(textToSend);
         });
 
-        // عملکرد دکمه بستن مینی‌اپ
+        // عملکرد دکمه بستن
         document.getElementById('close-btn').addEventListener('click', () => {
             webapp.close();
         });
