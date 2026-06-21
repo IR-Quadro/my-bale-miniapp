@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مینی‌اپ هوشمند بله</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --primary-color: #512da8;
+            --primary-light: #7c52ca;
+            --bg-color: #f4f6fa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --accent-color: #00b894;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 30px 24px;
+            text-align: center;
+            margin: auto;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .profile-section {
+            margin-bottom: 25px;
+        }
+
+        .avatar-placeholder {
+            width: 84px;
+            height: 84px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 15px;
+            box-shadow: 0 8px 20px rgba(81, 45, 168, 0.2);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+            text-align: right;
+        }
+
+        .card-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .card-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--accent-color);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(81, 45, 168, 0.15);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            background-color: #412287;
+        }
+
+        .btn-secondary {
+            background-color: #f1f2f6;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+            background-color: #e4e7eb;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.5); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 184, 148, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); }
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="profile-section">
+            <div class="avatar-placeholder" id="user-avatar">📱</div>
+            <h1 id="user-greeting">سلام کاربر گرامی!</h1>
+            <p class="subtitle">به مینی‌اپ آزمایشی بله خوش آمدید. این وب‌اپلیکیشن اطلاعات نیتیو پیام‌رسان را استخراج می‌کند.</p>
+            
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>اتصال امن به بله برقرار است</span>
+            </div>
+        </div>
+
+        <div class="info-cards">
+            <div class="card">
+                <div class="card-title">نام کاربری</div>
+                <div class="card-value" id="username">بارگذاری...</div>
+            </div>
+            <div class="card">
+                <div class="card-title">شناسه کاربری (ID)</div>
+                <div class="card-value" id="user-id">بارگذاری...</div>
+            </div>
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-title">پلتفرم اجرا کننده</div>
+                <div class="card-value" id="platform">بارگذاری...</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-primary" id="send-data-btn">ارسال دیتای تست به ربات</button>
+            <button class="btn-secondary" id="close-btn">بستن مینی‌اپ</button>
+        </div>
+
+        <div class="footer-text">توسعه یافته برای تست بستر مینی‌اپ پیام‌رسان بله</div>
+    </div>
+
+    <script>
+        // مقداردهی اولیه به لایه مینی‌اپ
+        const webapp = window.Telegram.WebApp;
+        
+        // اعلام آمادگی به برنامه بله
+        webapp.ready();
+        webapp.expand(); // باز کردن کامل مینی‌اپ در صفحه گوشی
+
+        // دریافت اطلاعات کاربر
+        const initDataUnsafe = webapp.initDataUnsafe;
+
+        if (initDataUnsafe && initDataUnsafe.user) {
+            const user = initDataUnsafe.user;
+            
+            // نمایش اطلاعات واقعی کاربر بله در صفحه
+            document.getElementById('user-greeting').innerText = `سلام ${user.first_name || 'کاربر'} عزیز!`;
+            document.getElementById('username').innerText = user.username ? `@${user.username}` : 'ندارد';
+            document.getElementById('user-id').innerText = user.id || 'نامشخص';
+            
+            // تغییر آواتار به حرف اول اسم کاربر
+            if(user.first_name) {
+                document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
+            }
+        } else {
+            // مقادیر پیش‌فرض اگر در مرورگر معمولی باز شود
+            document.getElementById('user-greeting').innerText = "سلام توسعه‌دهنده گرامی!";
+            document.getElementById('username').innerText = "@guest_user";
+            document.getElementById('user-id').innerText = "123456789";
+        }
+
+        // نمایش پلتفرم اجرا کننده
+        document.getElementById('platform').innerText = webapp.platform || "مرورگر وب معمولی";
+
+        // عملکرد دکمه ارسال دیتا به ربات
+        document.getElementById('send-data-btn').addEventListener('click', () => {
+            const sampleData = {
+                status: "success",
+                message: "سلام! این پیام از داخل مینی‌اپ فرستاده شده است.",
+                timestamp: Date.now()
+            };
+            // فرستادن اطلاعات به بازو و بستن برنامه
+            webapp.sendData(JSON.stringify(sampleData));
+        });
+
+        // عملکرد دکمه بستن مینی‌اپ
+        document.getElementById('close-btn').addEventListener('click', () => {
+            webapp.close();
+        });
+    </script>
+</body>
+</html>
