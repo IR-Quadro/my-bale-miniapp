@@ -2,9 +2,11 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>مینی‌اپ هوشمند بله</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="https://tapi.bale.ai/miniapp.js?3"></script>
+    
     <style>
         :root {
             --primary-color: #512da8;
@@ -46,7 +48,6 @@
             text-align: center;
             margin: auto;
             border: 1px solid rgba(0,0,0,0.03);
-            transition: transform 0.3s ease;
         }
 
         .profile-section {
@@ -108,7 +109,6 @@
             word-break: break-all;
         }
 
-        /* بخش جدید ورود متن */
         .input-section {
             margin: 20px 0;
             text-align: right;
@@ -135,7 +135,6 @@
             resize: none;
             outline: none;
             transition: all 0.25s ease;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
         }
 
         .custom-textarea:focus {
@@ -192,7 +191,6 @@
 
         .btn-primary:active {
             transform: scale(0.98);
-            background-color: #412287;
         }
 
         .btn-secondary {
@@ -200,15 +198,10 @@
             color: var(--text-main);
         }
 
-        .btn-secondary:active {
-            transform: scale(0.98);
-            background-color: #e4e7eb;
-        }
-
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.5); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 184, 148, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); }
+            0% { transform: scale(0.95); }
+            70% { transform: scale(1); }
+            100% { transform: scale(0.95); }
         }
 
         .footer-text {
@@ -221,105 +214,101 @@
 <body>
 
     <div class="container">
-        <!-- هدر و آواتار -->
         <div class="profile-section">
             <div class="avatar-placeholder" id="user-avatar">📱</div>
             <h1 id="user-greeting">سلام کاربر گرامی!</h1>
-            <p class="subtitle">به مینی‌اپ هوشمند بله خوش آمدید. متن خود را در باکس زیر بنویسید تا به بک‌اند سرورلس ارسال شود.</p>
+            <p class="subtitle">به مینی‌اپ اختصاصی بله خوش آمدید. متن خود را در کادر زیر بنویسید.</p>
             
             <div class="status-badge">
                 <div class="status-dot"></div>
-                <span>اتصال امن به بله برقرار است</span>
+                <span>اتصال نیتیو Bale SDK برقرار است</span>
             </div>
         </div>
 
-        <!-- کارت‌های دیتای کلاینت -->
         <div class="info-cards">
             <div class="card">
-                <div class="card-title">نام کاربری</div>
-                <div class="card-value" id="username">بارگذاری...</div>
+                <div class="card-title">نوع کلاینت</div>
+                <div class="card-value" id="username">Bale WebApp</div>
             </div>
             <div class="card">
-                <div class="card-title">وضعیت هویت</div>
-                <div class="card-value" id="user-id">بارگذاری...</div>
+                <div class="card-title">وضعیت امنیت</div>
+                <div class="card-value" id="user-id">تایید لبه شبکه‌ 🔒</div>
             </div>
             <div class="card" style="grid-column: span 2;">
                 <div class="card-title">پلتفرم اجرا کننده</div>
-                <div class="card-value" id="platform">بارگذاری...</div>
+                <div class="card-value" id="platform">Bale Client App</div>
             </div>
         </div>
 
-        <!-- پنجره جدید برای نوشتن متن تست -->
         <div class="input-section">
-            <label class="input-label" for="test-message">متن ارسالی به ربات:</label>
-            <textarea class="custom-textarea" id="test-message" placeholder="پیام خود را اینجا بنویسید... مثلاً: سلام کلادفلر!"></textarea>
+            <label class="input-label" for="test-message">متن ارسالی به بازو:</label>
+            <textarea class="custom-textarea" id="test-message" placeholder="پیام خود را اینجا بنویسید..."></textarea>
         </div>
 
-        <!-- دکمه‌ها -->
         <div class="btn-group">
-            <button class="btn-primary" id="send-data-btn">ارسال متن به بک‌اند پایتون/ورکر</button>
+            <button class="btn-primary" id="send-data-btn">ارسال متن به بک‌اند کلادفلر</button>
             <button class="btn-secondary" id="close-btn">بستن مینی‌اپ</button>
         </div>
 
-        <div class="footer-text">توسعه یافته برای تست بستر مینی‌اپ پیام‌رسان بله</div>
+        <div class="footer-text">توسعه یافته بر اساس فریم‌ورک اختصاصی بله</div>
     </div>
 
     <script>
-        // Set dynamic placeholders
-        document.getElementById('platform').innerText = "Bale Android/iOS Client";
+        // Mapping to the verified Bale SDK namespace
+        const WebApp = window.Bale?.WebApp;
 
-        // Native bridge function for Bale
-        function sendDataToBale(text) {
-            try {
-                // Method 1: Official Bale SDK check
-                if (window.BaleWebApp && typeof window.BaleWebApp.sendData === 'function') {
-                    window.BaleWebApp.sendData(text);
-                    return true;
+        function initApp() {
+            if (WebApp) {
+                try {
+                    // Signal readiness to Bale client
+                    WebApp.ready();
+                    WebApp.expand();
+                } catch (e) {
+                    console.error("Initialization call failed:", e);
                 }
                 
-                // Method 2: Native Android Interface Injection Check
-                if (window.Bale && typeof window.Bale.sendData === 'function') {
-                    window.Bale.sendData(text);
-                    return true;
+                // Safely update user profile interface if data is populated
+                const user = WebApp.initDataUnsafe?.user;
+                if (user) {
+                    document.getElementById('user-greeting').textContent = `سلام ${user.first_name || 'کاربر'} عزیز!`;
+                    document.getElementById('user-id').textContent = "کلاینت معتبر 🟢";
+                    document.getElementById('username').textContent = user.username ? `@${user.username}` : "Bale User";
+                    if (user.first_name) {
+                        document.getElementById('user-avatar').textContent = user.first_name.charAt(0);
+                    }
                 }
-
-                // Method 3: Standard Telegram compatible fallback (Since Bale mimics Telegram's core)
-                if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.sendData === 'function') {
-                    window.Telegram.WebApp.sendData(text);
-                    return true;
-                }
-            } catch (e) {
-                console.error("Native bridge redirection failed:", e);
             }
-            return false;
         }
 
-        // Send Data button logic
+        // Send text via verified Bale SDK bridging mechanism
         document.getElementById('send-data-btn').addEventListener('click', () => {
             const userText = document.getElementById('test-message').value.trim();
-            const textToSend = userText ? userText : "سلام! ارسال سیگنال از مینی‌اپ بله 🚀";
+            const textToSend = userText ? userText : "سلام! ارسال پیام موفقیت‌آمیز از ساختار جدید بله 🚀";
             
-            const success = sendDataToBale(textToSend);
-            
-            if (!success) {
-                alert("بستر ارسال داده نیتیو توسط این نسخه از کلاینت بله شناسایی نشد. لطفاً دیتای ورودی را در چت معمولی ربات تست کنید.");
+            if (WebApp && typeof WebApp.sendData === 'function') {
+                WebApp.sendData(textToSend);
+                
+                // Visual feedback to the user upon execution
+                const btn = document.getElementById('send-data-btn');
+                const originalText = btn.textContent;
+                btn.textContent = "ارسال شد ✓";
+                setTimeout(() => btn.textContent = originalText, 2000);
+            } else {
+                alert("خطا: ساختار Bale.WebApp در این دستگاه آماده نشده است.");
             }
         });
 
-        // Close button logic
+        // Close runtime bridge
         document.getElementById('close-btn').addEventListener('click', () => {
-            try {
-                if (window.BaleWebApp && typeof window.BaleWebApp.close === 'function') {
-                    window.BaleWebApp.close();
-                } else if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.close === 'function') {
-                    window.Telegram.WebApp.close();
-                } else {
-                    window.close();
-                }
-            } catch (e) {
+            if (WebApp && typeof WebApp.close === 'function') {
+                WebApp.close();
+            } else {
                 window.close();
             }
         });
+
+        // Run bootstrap layout adjustments immediately after view load
+        window.onload = initApp;
     </script>
 </body>
 </html>
