@@ -265,77 +265,54 @@
     </div>
 
     <script>
-        // Defensive initialization to prevent script crashing
-        let webapp = null;
-        
-        try {
-            if (window.Telegram && window.Telegram.WebApp) {
-                webapp = window.Telegram.WebApp;
-                
-                // Call ready if available
-                if (typeof webapp.ready === 'function') webapp.ready();
-                
-                // Call expand if available (Bale might not support this)
-                if (typeof webapp.expand === 'function') webapp.expand();
-            }
-        } catch (e) {
-            console.error("Bale WebApp initialization failed:", e);
-        }
+        // Set dynamic placeholders
+        document.getElementById('platform').innerText = "Bale Android/iOS Client";
 
-        // Safely extract user data or use fallbacks
-        let userData = null;
-        try {
-            if (webapp && webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
-                userData = webapp.initDataUnsafe.user;
-            }
-        } catch (e) {
-            console.error("Failed to read initData:", e);
-        }
-
-        // Render UI Elements safely
-        if (userData) {
-            document.getElementById('user-greeting').innerText = `سلام ${userData.first_name || 'کاربر'} عزیز!`;
-            document.getElementById('username').innerText = userData.username ? `@${userData.username}` : 'ندارد';
-            document.getElementById('user-id').innerText = "تایید کلاینت 🟢";
-            if (userData.first_name) {
-                document.getElementById('user-avatar').innerText = userData.first_name.charAt(0);
-            }
-        } else {
-            // Safe fallback for Bale
-            document.getElementById('user-greeting').innerText = "به مینی‌اپ بله خوش آمدید!";
-            document.getElementById('username').innerText = "ارسال امن";
-            document.getElementById('user-id').innerText = "تایید در بک‌اند 🔒";
-            document.getElementById('user-avatar').innerText = "📱";
-        }
-
-        // Render Platform info safely
-        try {
-            document.getElementById('platform').innerText = (webapp && webapp.platform) ? webapp.platform : "Bale App";
-        } catch (e) {
-            document.getElementById('platform').innerText = "Bale App";
-        }
-
-        // Button action: This will now definitely run even if WebApp APIs fail
-        document.getElementById('send-data-btn').addEventListener('click', () => {
-            const userText = document.getElementById('test-message').value.trim();
-            const textToSend = userText ? userText : "کاربر متنی وارد نکرد، این یک سیگنال خودکار است. 🚀";
-            
+        // Native bridge function for Bale
+        function sendDataToBale(text) {
             try {
-                if (webapp && typeof webapp.sendData === 'function') {
-                    webapp.sendData(textToSend);
-                } else {
-                    alert("خطا: امکان ارسال داده مستقیم از این کلاینت وجود ندارد.");
+                // Method 1: Official Bale SDK check
+                if (window.BaleWebApp && typeof window.BaleWebApp.sendData === 'function') {
+                    window.BaleWebApp.sendData(text);
+                    return true;
+                }
+                
+                // Method 2: Native Android Interface Injection Check
+                if (window.Bale && typeof window.Bale.sendData === 'function') {
+                    window.Bale.sendData(text);
+                    return true;
+                }
+
+                // Method 3: Standard Telegram compatible fallback (Since Bale mimics Telegram's core)
+                if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.sendData === 'function') {
+                    window.Telegram.WebApp.sendData(text);
+                    return true;
                 }
             } catch (e) {
-                alert("خطا در ارسال داده: " + e.message);
+                console.error("Native bridge redirection failed:", e);
+            }
+            return false;
+        }
+
+        // Send Data button logic
+        document.getElementById('send-data-btn').addEventListener('click', () => {
+            const userText = document.getElementById('test-message').value.trim();
+            const textToSend = userText ? userText : "سلام! ارسال سیگنال از مینی‌اپ بله 🚀";
+            
+            const success = sendDataToBale(textToSend);
+            
+            if (!success) {
+                alert("بستر ارسال داده نیتیو توسط این نسخه از کلاینت بله شناسایی نشد. لطفاً دیتای ورودی را در چت معمولی ربات تست کنید.");
             }
         });
 
-        // Close button action
+        // Close button logic
         document.getElementById('close-btn').addEventListener('click', () => {
             try {
-                if (webapp && typeof webapp.close === 'function') {
-                    webapp.close();
+                if (window.BaleWebApp && typeof window.BaleWebApp.close === 'function') {
+                    window.BaleWebApp.close();
+                } else if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.close === 'function') {
+                    window.Telegram.WebApp.close();
                 } else {
                     window.close();
                 }
