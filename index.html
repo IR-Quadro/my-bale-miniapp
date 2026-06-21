@@ -253,62 +253,52 @@
         <div class="footer-text">توسعه یافته بر اساس فریم‌ورک اختصاصی بله</div>
     </div>
 
-    <script>
-        // Mapping to the verified Bale SDK namespace
-        const WebApp = window.Bale?.WebApp;
+<script>
+    const WebApp = window.Bale?.WebApp;
 
-        function initApp() {
-            if (WebApp) {
-                try {
-                    // Signal readiness to Bale client
-                    WebApp.ready();
-                    WebApp.expand();
-                } catch (e) {
-                    console.error("Initialization call failed:", e);
-                }
-                
-                // Safely update user profile interface if data is populated
-                const user = WebApp.initDataUnsafe?.user;
-                if (user) {
-                    document.getElementById('user-greeting').textContent = `سلام ${user.first_name || 'کاربر'} عزیز!`;
-                    document.getElementById('user-id').textContent = "کلاینت معتبر 🟢";
-                    document.getElementById('username').textContent = user.username ? `@${user.username}` : "Bale User";
-                    if (user.first_name) {
-                        document.getElementById('user-avatar').textContent = user.first_name.charAt(0);
-                    }
-                }
-            }
+    async function initApp() {
+        if (!WebApp) {
+            console.error("Bale.WebApp not available");
+            return;
         }
 
-        // Send text via verified Bale SDK bridging mechanism
-        document.getElementById('send-data-btn').addEventListener('click', () => {
-            const userText = document.getElementById('test-message').value.trim();
-            const textToSend = userText ? userText : "سلام! ارسال پیام موفقیت‌آمیز از ساختار جدید بله 🚀";
-            
-            if (WebApp && typeof WebApp.sendData === 'function') {
-                WebApp.sendData(textToSend);
-                
-                // Visual feedback to the user upon execution
-                const btn = document.getElementById('send-data-btn');
-                const originalText = btn.textContent;
-                btn.textContent = "ارسال شد ✓";
-                setTimeout(() => btn.textContent = originalText, 2000);
-            } else {
-                alert("خطا: ساختار Bale.WebApp در این دستگاه آماده نشده است.");
-            }
-        });
+        try {
+            WebApp.ready();
+            WebApp.expand();
+        } catch (e) { console.error(e); }
 
-        // Close runtime bridge
-        document.getElementById('close-btn').addEventListener('click', () => {
-            if (WebApp && typeof WebApp.close === 'function') {
-                WebApp.close();
-            } else {
-                window.close();
-            }
-        });
+        // نمایش اطلاعات کاربر
+        const user = WebApp.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('user-greeting').textContent = `سلام ${user.first_name || 'کاربر'}!`;
+            document.getElementById('user-avatar').textContent = user.first_name?.[0] || '👤';
+            document.getElementById('username').textContent = user.username ? `@${user.username}` : "کاربر بله";
+        }
+    }
 
-        // Run bootstrap layout adjustments immediately after view load
-        window.onload = initApp;
-    </script>
+    // ارسال داده
+    document.getElementById('send-data-btn').addEventListener('click', () => {
+        const userText = document.getElementById('test-message').value.trim();
+        const textToSend = userText || "سلام از مینی‌اپ! 🚀";
+
+        if (WebApp && typeof WebApp.sendData === 'function') {
+            WebApp.sendData(textToSend);   // داده به صورت رشته ساده ارسال می‌شه
+
+            // فیدبک
+            const btn = document.getElementById('send-data-btn');
+            const orig = btn.textContent;
+            btn.textContent = "ارسال شد ✓";
+            setTimeout(() => btn.textContent = orig, 1800);
+        } else {
+            alert("Bale.WebApp در دسترس نیست. مینی‌اپ را از دکمه کیبورد معمولی باز کنید.");
+        }
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+        WebApp?.close();
+    });
+
+    window.onload = initApp;
+</script>
 </body>
 </html>
