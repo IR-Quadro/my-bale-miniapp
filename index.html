@@ -265,47 +265,83 @@
     </div>
 
     <script>
-        // مقداردهی اولیه به لایه مینی‌اپ
-        const webapp = window.Telegram.WebApp;
-        webapp.ready();
-        webapp.expand(); 
+        // Defensive initialization to prevent script crashing
+        let webapp = null;
+        
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                webapp = window.Telegram.WebApp;
+                
+                // Call ready if available
+                if (typeof webapp.ready === 'function') webapp.ready();
+                
+                // Call expand if available (Bale might not support this)
+                if (typeof webapp.expand === 'function') webapp.expand();
+            }
+        } catch (e) {
+            console.error("Bale WebApp initialization failed:", e);
+        }
 
-        // دریافت اطلاعات کلاینت و اعمال Fallback هوشمند برای کلاینت بله
-        const initDataUnsafe = webapp.initDataUnsafe;
+        // Safely extract user data or use fallbacks
+        let userData = null;
+        try {
+            if (webapp && webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
+                userData = webapp.initDataUnsafe.user;
+            }
+        } catch (e) {
+            console.error("Failed to read initData:", e);
+        }
 
-        if (initDataUnsafe && initDataUnsafe.user) {
-            const user = initDataUnsafe.user;
-            document.getElementById('user-greeting').innerText = `سلام ${user.first_name || 'کاربر'} عزیز!`;
-            document.getElementById('username').innerText = user.username ? `@${user.username}` : 'ندارد';
+        // Render UI Elements safely
+        if (userData) {
+            document.getElementById('user-greeting').innerText = `سلام ${userData.first_name || 'کاربر'} عزیز!`;
+            document.getElementById('username').innerText = userData.username ? `@${userData.username}` : 'ندارد';
             document.getElementById('user-id').innerText = "تایید کلاینت 🟢";
-            if(user.first_name) {
-                document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
+            if (userData.first_name) {
+                document.getElementById('user-avatar').innerText = userData.first_name.charAt(0);
             }
         } else {
-            // مقادیر جایگزین پایدار برای بله
+            // Safe fallback for Bale
             document.getElementById('user-greeting').innerText = "به مینی‌اپ بله خوش آمدید!";
             document.getElementById('username').innerText = "ارسال امن";
             document.getElementById('user-id').innerText = "تایید در بک‌اند 🔒";
             document.getElementById('user-avatar').innerText = "📱";
         }
 
-        // نمایش پلتفرم
-        document.getElementById('platform').innerText = webapp.platform || "Bale Messenger Client";
+        // Render Platform info safely
+        try {
+            document.getElementById('platform').innerText = (webapp && webapp.platform) ? webapp.platform : "Bale App";
+        } catch (e) {
+            document.getElementById('platform').innerText = "Bale App";
+        }
 
-        // عملکرد دکمه ارسال دیتای کاستوم شده با متن چت‌باکس
+        // Button action: This will now definitely run even if WebApp APIs fail
         document.getElementById('send-data-btn').addEventListener('click', () => {
             const userText = document.getElementById('test-message').value.trim();
-            
-            // اگر باکس خالی بود یک متن پیش‌فرض بفرستد
             const textToSend = userText ? userText : "کاربر متنی وارد نکرد، این یک سیگنال خودکار است. 🚀";
             
-            // فرستادن مستقیم متن داخل تکست‌اریا به ربات بله
-            webapp.sendData(textToSend);
+            try {
+                if (webapp && typeof webapp.sendData === 'function') {
+                    webapp.sendData(textToSend);
+                } else {
+                    alert("خطا: امکان ارسال داده مستقیم از این کلاینت وجود ندارد.");
+                }
+            } catch (e) {
+                alert("خطا در ارسال داده: " + e.message);
+            }
         });
 
-        // عملکرد دکمه بستن
+        // Close button action
         document.getElementById('close-btn').addEventListener('click', () => {
-            webapp.close();
+            try {
+                if (webapp && typeof webapp.close === 'function') {
+                    webapp.close();
+                } else {
+                    window.close();
+                }
+            } catch (e) {
+                window.close();
+            }
         });
     </script>
 </body>
